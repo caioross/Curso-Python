@@ -1,0 +1,24 @@
+import imdb
+import pandas as pd
+
+ia = imdb.IMDb()
+genre = "sci-fi"
+movies = ia.get_top250_movies()
+titles = []
+years = []
+imdb_ratings = []
+votes = []
+
+for movie in movies:
+        titles.append(movie['title'])
+        years.append(movie['year'])
+        imdb_ratings.append(movie['rating'])
+        votes.append(movie['votes'])
+
+sci_fi_df = pd.DataFrame({'filme': titles,
+                      'ano': years,
+                      'imdb': imdb_ratings,
+                      'votos': votes}
+                      )
+
+sci_fi_df
