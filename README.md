@@ -3,5 +3,4 @@ Este repositório contém todo o material e scripts do curso de Python ministrad
 
 
 
-"https://www.imdb.com/search/title?genres=sci-fi&" + "start=" + str(page) 
-  + "&explore=title_type,genres&ref_=adv_prv", headers=headers
+https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=GOOGL&apikey={api_key}
