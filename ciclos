@@ -1,0 +1,43 @@
+import os
+import time
+import psutil
+from pathlib import Path
+
+# Caminho da pasta com os atalhos
+pasta_atual = r"C:\Users\kio19\Desktop\Ciclos"
+
+# Obter a lista de arquivos da pasta
+arquivos = [str(arquivo) for arquivo in Path(pasta_atual).glob("*.lnk")]
+arquivos.sort()  # Ordenar para garantir a sequência correta
+
+# Função para abrir os atalhos
+def abrir_atalhos(atalhos):
+    for atalho in atalhos:
+        os.startfile(atalho)  # Abre o atalho no Windows
+
+# Função para fechar o Chrome
+def fechar_chrome():
+    for processo in psutil.process_iter(['name']):
+        if 'chrome' in processo.info['name'].lower():
+            processo.terminate()  # Terminar o processo do Chrome
+
+# Ciclo infinito para executar os passos
+while True:
+    for i in range(0, len(arquivos), 10):
+        # Selecionar os próximos 10 arquivos
+        lote = arquivos[i:i+10]
+
+        # Abrir os atalhos
+        print(f"Abrindo atalhos: {lote}")
+        abrir_atalhos(lote)
+
+        # Aguardar 30 minutos
+        print("Aguardando 30 minutos...")
+        time.sleep(30 * 60)
+
+        # Fechar o Chrome
+        print("Fechando o Chrome...")
+        fechar_chrome()
+
+    # Reiniciar o ciclo ao final
+    print("Reiniciando o ciclo...")
