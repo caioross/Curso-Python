@@ -1,5 +1,7 @@
 # Curso de Python
 
+https://raw.githubusercontent.com/mwaskom/seaborn-data/master/tips.csv
+
 ## Descrição
 
 Este repositório contém todo o material e scripts do curso de Python ministrado por mim. Aqui você encontrará os conteúdos, exercícios e exemplos de código, assim como outros materiais auxiliares para o seu aprendizado em Python.
