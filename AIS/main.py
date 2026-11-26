@@ -13,6 +13,9 @@ import sqlite3
 import os
 import config
 import numpy as np
+import dash
+from dash import Dash, html, dcc
+import plotly.graph_objs as go
 
 app = Flask(__name__)
 db_path = config.DB_PATH
@@ -52,6 +55,7 @@ def index():
         <a href='/consultar'> Consultar dados Armazenados </a><br>
         <a href='/graficos'> Visualizar Graficos </a><br>
         <a href='/editar_inadimplencia'> Editar dados de Inadimplencia </a><br>
+        <a href='/editar_selic'> Editar taxa Selic </a><br>
         <a href='/correlacao'> Analisar Correlação </a><br>                                                      
     ''')
 
@@ -116,7 +120,139 @@ def consultar() :
         <br><a  href="/"> Voltar </a>             
     ''')
     
+@app.route('/graficos')
+def graficos():
+    with sqlite3.connect(db_path) as conn :
+        inad_df = pd.read_sql_query('SELECT * FROM inadimplencia', conn)
+        selic_df = pd.read_sql_query('SELECT * FROM selic', conn)
+        
+    fig1 = go.Figure()
+    fig1.add_trace(go.Scatter(
+        x = inad_df['mes'], 
+        y = inad_df['inadimplencia'],
+        mode = 'lines+markers',
+        name = 'Inadimplência'       
+        )
+    )
+    # 'ggplot2', 'seaborn', 'simple_white', 'plotly','plotly_white', 'plotly_dark', 'presentation', 'xgridoff','ygridoff', 'gridon', 'none'
+    fig1.update_layout(
+        title = "Evolução da Inadimplencia",
+        xaxis_title = "Mês",
+        yaxis_title = '%',
+        template = 'plotly_dark'
+    )
+    fig2 = go.Figure()
+    fig2.add_trace(go.Scatter(
+        x = selic_df['mes'], 
+        y = selic_df['selic_diaria'],
+        mode = 'lines+markers',
+        name = 'Selic'
+        )
+    )
+    fig2.update_layout(
+        title       = 'Média Mensal da Selic',
+        xaxis_title = "Mês",
+        yaxis_title = "Taxa",
+        template    = "plotly_dark"
+    )
     
+    graph_html_1 = fig1.to_html(full_html=False, include_plotlyjs='cdn')
+    graph_html_2 = fig2.to_html(full_html=False, include_plotlyjs=False)
+    
+    return render_template_string('''
+        <html>
+            <head>
+                <title> Graficos Esconomicos </title>
+                <style>
+                        .container{
+                            display:flex;
+                            justify-content:space-around;
+                            width: 100%;
+                        }
+                        .graph{ 
+                            width: 48%;
+                        }         
+                </style>
+            </head>
+            <body>
+                   <h1><marquee> Graficos Economicos </marquee></h1>   
+                    <div class="container">                     
+                        <div class="graph">{{ grafico1|safe }}</div>
+                        <div class="graph">{{ grafico2|safe}}</div>
+                    </div>            
+            </body>
+        </html>                              
+    ''', grafico1 = graph_html_1, grafico2 = graph_html_2)
+
+@app.route('/editar_inadimplencia', methods=['POST','GET'])
+def editar_inadimplencia():
+    # Recebe os dados e realiza a edição
+    if request.method == 'POST':
+        mes = request.form.get('campo_mes')
+        novo_valor = request.form.get('campo_valor')
+        try:
+            novo_valor = float(novo_valor)
+        except:
+            return jsonify({"Erro":"Valor invalido"})
+        
+        with sqlite3.connect(db_path) as conn :
+            cursor = conn.cursor()
+            cursor.execute("UPDATE inadimplencia SET inadimplencia = ? WHERE mes = ?", (novo_valor, mes))
+        return jsonify({"Mensagem": f" Valor atualizado para o mes {mes} com sucesso"})
+                    # 2011-04
+    #exibe o painel de edição (primeira carga sem dados editados)
+    return render_template_string('''
+        <h1> Editar Inadimplencia </h1>
+        <form method="POST" action="/editar_inadimplencia">
+            <label for="campo_mes">Mês (AAAA-MM):</label>
+            <input type="text" name="campo_mes"><br>
+                                  
+            <label for="campo_valor">Novo valor de Inadimplência:</label>
+            <input type="text" name="campo_valor"><br>
+                                  
+            <input type="submit" value="Atualizar Dados">
+        </form>
+        <br>
+        <a href="/"> Voltar </a>
+    ''')
+    
+@app.route('/editar_selic', methods=["POST","GET"])
+def editar_selic():
+    if request.method == 'POST':
+        mes = request.form.get('campo_mes')
+        novo_valor = request.form.get('campo_valor')
+        try:
+            novo_valor = float(novo_valor)
+        except:
+            return jsonify({'Erro':'Valor de Taxa invalido'}),400
+        
+        with sqlite3.connect(db_path) as conn :
+            cursor = conn.cursor()
+            cursor.execute("UPDATE selic SET selic_diaria = ? WHERE mes = ?", (novo_valor, mes))
+            conn.commit()
+        
+            if cursor.rowcount == 0 :
+                return jsonify({'Erro':f'Não foi possivel encontrar o registro para o mês {mes}'}), 404
+
+        return jsonify({'Mensagem':f'Taxa selic atualizada para o mes {mes} com sucesso'})
+    return render_template_string('''
+        <h1>Editar Taxa SELIC</h1>
+        <form method="POST" action="/editar_selic">
+            <label for="campo_mes">Mês (AAAA-MM):</label>
+            <input name="campo_mes" required>
+            <br><br>
+            <label for="campo_valor">Nova Taxa SELIC:</label>
+            <input name="campo_valor">
+            <br><br>
+            <input type="submit" value="Atualizar Dados">
+        </form>
+        <br>
+        <a href="/">Voltar</a>                              
+    ''')
+
+
+
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
