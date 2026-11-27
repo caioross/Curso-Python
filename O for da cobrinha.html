@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O for da cobrinha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Nunito:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: sala de aula animada, alegre, mas clara e paciente
+   IDEA: um Nokia 3310 que roda o for passo a passo, como um depurador de bolso
+   PICTURE: o celular com a tela LCD verde, a cobra violeta e setas mostrando quem vai para onde
+   COLOUR and TYPE: verde LCD domina, azul-marinho do Nokia de apoio, violeta/roxo da cobra (as cores do código) como destaque; Silkscreen pixelado + Nunito
+   LAYOUT: título, laboratório (celular | código + explicação + memória), depois comparação, range e a correção do código */
+:root{color-scheme:light dark;--bg:light-dark(#e2ebc4,#11160c);--ink:light-dark(#1b2410,#e4edcb);--muted:light-dark(#4a5733,#a9b68c);--panel:light-dark(#f5f9e8,#192011);--line:light-dark(#bfcc98,#2d3921);--navy:#1f2b48;--navy2:#2c3b60;--lcd:#a9c46c;--px:#28361a;--violet:#ee82ee;--purple:#800080;--hl:light-dark(#fff0a0,#4c430f);--hlink:light-dark(#7a5a00,#ffd95a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 Nunito,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(28px,4vw,64px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+h1,h2{font-family:Silkscreen,monospace;font-weight:700;line-height:1.05;text-wrap:balance;margin:0 0 14px}
+h1{font-size:clamp(30px,5vw,50px)}h2{font-size:clamp(24px,3.4vw,36px)}
+p{max-width:68ch;margin:0 0 14px}
+.lead{font-size:19px;color:var(--muted)}
+code,pre{font-family:"JetBrains Mono",monospace}
+code{overflow-wrap:anywhere;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:.88em}
+pre,.scroll{overflow-x:auto}
+.lab{display:grid;grid-template-columns:minmax(0,430px) minmax(0,1fr);gap:clamp(20px,3vw,40px);align-items:start;margin-top:24px}
+@media(max-width:900px){.lab{grid-template-columns:minmax(0,1fr)}.phone{margin:0 auto}}
+/* celular */
+.phone{background:linear-gradient(160deg,var(--navy2),var(--navy) 60%);border-radius:46px 46px 70px 70px;padding:26px 22px 30px;box-shadow:0 24px 50px -18px #0008,inset 0 2px 0 #ffffff22,inset 0 -6px 0 #0004;max-width:430px;width:100%}
+.brand{font-family:Silkscreen,monospace;color:#d9e2ff;text-align:center;letter-spacing:.1em;font-size:15px;margin-bottom:12px}
+.screen{background:#3a4a2a;border-radius:16px;padding:10px;box-shadow:inset 0 3px 8px #0007}
+.lcd{position:relative;aspect-ratio:3/2;background:var(--lcd);border-radius:8px;overflow:hidden}
+.lcd svg{position:absolute;inset:0;width:100%;height:100%}
+.pc{transition:transform .55s cubic-bezier(.3,1.35,.5,1)}
+.pc.hot rect.b{stroke:#fff6a0;stroke-width:2.2}
+.keys{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:10px;margin-top:18px}
+.key{min-height:48px;border:0;border-radius:24px;background:#c9d3ec;color:#16203a;font:700 15px Nunito,sans-serif;cursor:pointer;box-shadow:0 4px 0 #8794b8;transition:transform .08s}
+.key:active{transform:translateY(3px);box-shadow:0 1px 0 #8794b8}
+.key.main{background:var(--violet);color:#3a0a3a;box-shadow:0 4px 0 #a04aa0}
+.key:disabled{opacity:.45;cursor:default}
+.key:focus-visible,.btn:focus-visible,input:focus-visible{outline:3px solid var(--hlink);outline-offset:3px}
+.counter{color:#c9d3ec;text-align:center;font-family:Silkscreen,monospace;font-size:13px;margin-top:12px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:10px;color:#c9d3ec;font-size:14px}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px}
+/* painéis */
+.code{background:#141a0e;color:#e6eed2;border-radius:14px;padding:14px 0;font-size:14.5px;line-height:1.75;box-shadow:0 10px 30px -18px #000a}
+.ln{display:flex;padding:0 16px;white-space:pre;transition:background .25s}
+.ln i{font-style:normal;color:#6c7a55;width:2.2em;flex:none;user-select:none}
+.ln.on{background:#4c430f;box-shadow:inset 4px 0 0 #ffd95a}
+.k{color:#ee82ee}.f{color:#8fd3ff}.n{color:#ffcf6b}.c{color:#8a9a6c}
+.say{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:16px;min-height:120px}
+.say b.step{font-family:Silkscreen,monospace;font-weight:400;font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+.say p{margin:0;font-size:18px}
+.vars{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.var{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:6px 12px;font-family:"JetBrains Mono",monospace;font-size:15px;white-space:nowrap;transition:background .3s}
+.var.on{background:var(--hl);border-color:var(--hlink)}
+table{border-collapse:collapse;width:100%;margin-top:16px;font-size:15px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
+td.num,th.num{text-align:right;font-family:"JetBrains Mono",monospace;white-space:nowrap}
+tr{transition:background .3s}tr.on{background:var(--hl)}tr.read{background:light-dark(#e4d6f7,#2e1f40)}
+.cap{font-size:14px;color:var(--muted);margin-top:6px}
+/* comparação */
+.alt{background:var(--navy);color:#e6ebff}
+.alt .lead{color:#b8c3e6}.alt code{background:#2c3b60;border-color:#3d4f7c;color:#fff}
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:22px}
+@media(max-width:700px){.duo{grid-template-columns:minmax(0,1fr)}}
+.card{background:#16203a;border-radius:20px;padding:16px}
+.card h3{font-family:Silkscreen,monospace;font-weight:400;font-size:17px;margin:0 0 10px}
+.card .lcd{border:6px solid #3a4a2a}
+.status{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;font-family:"JetBrains Mono",monospace;font-size:14px}
+.ok{color:#9be89b}.bad{color:#ff9d9d}
+.btn{min-height:46px;padding:0 20px;border:0;border-radius:23px;background:var(--violet);color:#3a0a3a;font:800 16px Nunito,sans-serif;cursor:pointer;margin:18px 10px 0 0}
+.btn.ghost{background:transparent;color:inherit;box-shadow:inset 0 0 0 2px currentColor}
+/* range */
+.rng{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end;font-family:"JetBrains Mono",monospace;font-size:clamp(22px,4vw,34px);margin:18px 0 8px}
+.arg{display:inline-flex;flex-direction:column;align-items:center;background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:4px 12px}
+.arg small{font:700 13px Nunito,sans-serif;color:var(--muted);white-space:nowrap}
+.a1{color:#a1309f}.a2{color:#1f6fb3}.a3{color:#b26b00}
+:root[data-theme=dark] .a1{color:#ee82ee}:root[data-theme=dark] .a2{color:#8fd3ff}:root[data-theme=dark] .a3{color:#ffcf6b}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .a1{color:#ee82ee}:root:not([data-theme=light]) .a2{color:#8fd3ff}:root:not([data-theme=light]) .a3{color:#ffcf6b}}
+input[type=range]{width:min(100%,360px);height:44px;accent-color:var(--purple)}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.chip{background:var(--panel);border:2px solid var(--purple);border-radius:14px;padding:8px 14px;animation:pop .45s backwards}
+.chip b{font-family:Silkscreen,monospace;font-weight:400;display:block}
+.chip span{font-family:"JetBrains Mono",monospace;font-size:14px}
+.empty{border:2px dashed var(--line);border-radius:14px;padding:12px 16px;max-width:68ch}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.9)}}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+@media(max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
+.fix pre{background:#141a0e;color:#e6eed2;border-radius:14px;padding:16px;font-size:14px;line-height:1.65;margin:0}
+.fix .add{background:#2d4a18;display:block;margin:0 -16px;padding:0 16px}
+.warn{border-left:5px solid var(--purple);background:var(--panel);border-radius:0 12px 12px 0;padding:12px 16px;margin:14px 0}
+@media(prefers-reduced-motion:reduce){.pc,.ln,tr,.var{transition:none}.chip{animation:none}}
+</style>
+</head>
+<body>
+
+<header class="band" style="padding-bottom:0">
+  <div class="wrap">
+    <h1>Como o corpo da cobrinha segue a cabeça</h1>
+    <p class="lead">A cada quadro do jogo, o <code>for</code> faz uma coisa só: <strong>cada pedaço pula para o lugar onde estava o pedaço da frente</strong>. Começando pelo último. Aperte <strong>Próximo</strong> e veja linha por linha.</p>
+  </div>
+</header>
+
+<section class="band">
+  <div class="wrap lab">
+    <div class="phone">
+      <div class="brand">NOKIA</div>
+      <div class="screen"><div class="lcd"><svg id="lcdMain" viewBox="0 0 240 160" role="img" aria-label="Tela do jogo com a cobra"></svg></div></div>
+      <div class="keys">
+        <button class="key" id="prev" aria-label="Passo anterior">◀ Voltar</button>
+        <button class="key main" id="next">Próximo ▶</button>
+        <button class="key" id="play">Auto</button>
+      </div>
+      <div class="counter" id="count">passo 1</div>
+      <div class="legend"><span><i class="sw" style="background:var(--violet)"></i>cabeça (cobra)</span><span><i class="sw" style="background:var(--purple)"></i>corpo[0], [1], [2]...</span></div>
+    </div>
+
+    <div>
+      <div class="code" id="code" aria-label="Código do laço"></div>
+      <div class="say" aria-live="polite"><b class="step" id="stepName"></b><p id="say"></p></div>
+      <div class="vars" id="vars"></div>
+      <table>
+        <thead><tr><th>Memória do jogo</th><th class="num">x</th><th class="num">y</th></tr></thead>
+        <tbody id="mem"></tbody>
+      </table>
+      <div class="cap">Linha amarela: o pedaço que mudou de lugar. Linha lilás: o pedaço de onde lemos a posição. Dica: as setas ← → do teclado também funcionam.</div>
+    </div>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="wrap">
+    <h2>Por que de trás para frente?</h2>
+    <p class="lead">Pense numa fila no recreio: se o primeiro da fila anda e o segundo tenta ir "para onde o primeiro está", ele vai parar em cima dele. Quem anda primeiro tem que ser <strong>o último da fila</strong>, porque o lugar da frente ainda guarda a posição antiga.</p>
+    <p>Os dois celulares abaixo começam iguais. O da esquerda usa <code>range(len(corpo) - 1, 0, -1)</code> (3, 2, 1). O da direita tenta <code>range(1, len(corpo))</code> (1, 2, 3).</p>
+    <div class="duo">
+      <div class="card">
+        <h3 class="ok">De trás para frente: 3, 2, 1</h3>
+        <div class="lcd"><svg id="lcdA" viewBox="0 0 240 160" role="img" aria-label="Ordem certa"></svg></div>
+        <div class="status"><span id="capA">Posição inicial</span><span id="cntA"></span></div>
+      </div>
+      <div class="card">
+        <h3 class="bad">De frente para trás: 1, 2, 3</h3>
+        <div class="lcd"><svg id="lcdB" viewBox="0 0 240 160" role="img" aria-label="Ordem errada"></svg></div>
+        <div class="status"><span id="capB">Posição inicial</span><span id="cntB"></span></div>
+      </div>
+    </div>
+    <button class="btn" id="runCmp">Rodar os dois</button><button class="btn ghost" id="resetCmp">Reiniciar</button>
+    <p style="margin-top:18px">Na ordem errada, o pedaço 1 vai para o lugar do 0. Aí o 2 copia o lugar <em>novo</em> do 1, que já é o lugar do 0. E o 3 também. Os três ficam empilhados e a cobra "encolhe".</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap two">
+    <div>
+      <h2>Decifrando o range</h2>
+      <p>Mexa no tamanho do corpo e veja quais valores de <code>i</code> o laço vai usar.</p>
+      <label for="size"><strong>Pedaços no corpo: <span id="sizeV">4</span></strong></label><br>
+      <input type="range" id="size" min="1" max="7" value="4">
+      <div class="rng" id="rng"></div>
+    </div>
+    <div>
+      <div class="chips" id="chips" aria-live="polite"></div>
+      <p class="cap" style="margin-top:14px">Repare: o <code>i</code> nunca chega em 0. Se chegasse, o código faria <code>corpo[0]</code> copiar <code>corpo[-1]</code>, que em Python é o <em>último</em> pedaço. Por isso o corpo[0] é tratado separado, seguindo a cabeça.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band fix" style="padding-top:0">
+  <div class="wrap two">
+    <div>
+      <h2>Atenção: falta uma linha no código</h2>
+      <p>No código da aula, o <code>for</code> lê <code>x</code> e <code>y</code> do pedaço da frente, mas <strong>nunca manda o pedaço andar</strong>. Do jeito que está, o corpo fica parado no centro da tela.</p>
+      <div class="warn">Três ajustes: <br>1. Colocar <code>corpo[i].goto(x, y)</code> dentro do <code>for</code>.<br>2. Levar o <code>corpo[0]</code> até a cabeça.<br>3. Fazer isso <strong>antes</strong> do bloco que move a cabeça. Se vier depois, o corpo[0] cai em cima da cabeça.</div>
+      <p class="cap">Pedaços novos nascem no centro (0, 0) e entram na fila já no quadro seguinte, então é normal ver um piscar rápido no meio da tela.</p>
+    </div>
+    <div>
+      <pre id="fixed">    time.sleep(0.1)
+
+    <span class="c"># 1) o corpo anda primeiro, de trás para frente</span>
+    for i in range(len(corpo) - 1, 0, -1):
+        x = corpo[i - 1].xcor()
+        y = corpo[i - 1].ycor()
+<span class="add">        corpo[i].goto(x, y)   <span class="c"># linha que faltava</span></span>
+<span class="add">    <span class="c"># 2) o primeiro pedaço vai para onde a cabeça está</span>
+    if len(corpo) &gt; 0:
+        corpo[0].goto(cobra.xcor(), cobra.ycor())
+</span>
+    <span class="c"># 3) só agora a cabeça anda</span>
+    if cobra.direction == "left":
+        cobra.setx(cobra.xcor() - 20)
+    elif cobra.direction == "right":
+        cobra.setx(cobra.xcor() + 20)
+    elif cobra.direction == "down":
+        cobra.sety(cobra.ycor() - 20)
+    elif cobra.direction == "up":
+        cobra.sety(cobra.ycor() + 20)</pre>
+      <button class="btn" id="copy">Copiar código</button><span id="copyMsg" class="cap" style="margin-left:6px"></span>
+    </div>
+  </div>
+</section>
+
+<script>
+{
+const START={h:[6,3],b:[[5,3],[4,3],[4,4],[4,5]]};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const tc=([c,r])=>[(c-6)*20,(4-r)*20];
+const NS='http://www.w3.org/2000/svg';
+
+function makeLCD(svg,n,id){
+  let g='';
+  for(let c=0;c<12;c++)for(let r=0;r<8;r++)g+=`<rect x="${c*20+1}" y="${r*20+1}" width="18" height="18" rx="2" fill="#9fb962"/>`;
+  let p='';
+  for(let i=n-1;i>=0;i--)p+=`<g class="pc" data-i="${i}"><rect class="b" x="1" y="1" width="18" height="18" rx="3" fill="#800080"/><text x="10" y="14" text-anchor="middle" font-family="Silkscreen,monospace" font-size="11" fill="#fff">${i}</text></g>`;
+  p+=`<g class="pc" data-i="h"><rect class="b" x="1" y="1" width="18" height="18" rx="5" fill="#ee82ee"/><rect x="11" y="5" width="3" height="3" fill="#28361a"/><rect x="11" y="12" width="3" height="3" fill="#28361a"/></g>`;
+  svg.innerHTML=`<defs><marker id="ar${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#28361a"/></marker></defs>${g}<rect x="201" y="21" width="18" height="18" rx="9" fill="#28361a"/><g class="under"></g>${p}<g class="over"></g>`;
+  const pcs={};svg.querySelectorAll('.pc').forEach(e=>pcs[e.dataset.i]=e);
+  const under=svg.querySelector('.under'),over=svg.querySelector('.over');
+  return {set(s){
+    const at=(e,[c,r])=>e.style.transform=`translate(${c*20}px,${r*20}px)`;
+    at(pcs.h,s.h);s.b.forEach((q,i)=>at(pcs[i],q));
+    Object.values(pcs).forEach(e=>e.classList.toggle('hot',(s.focus||[]).map(String).includes(e.dataset.i)));
+    let u='',o='';
+    if(s.ghost)u=`<rect x="${s.ghost[0]*20}" y="${s.ghost[1]*20}" width="20" height="20" rx="4" fill="none" stroke="#28361a" stroke-width="1.6" stroke-dasharray="3 2"/>`;
+    if(s.arrow){const[a,b]=s.arrow;const x1=a[0]*20+10,y1=a[1]*20+10,x2=b[0]*20+10,y2=b[1]*20+10,L=Math.hypot(x2-x1,y2-y1)||1,k=(L-9)/L;
+      o+=`<line x1="${x1}" y1="${y1}" x2="${x1+(x2-x1)*k}" y2="${y1+(y2-y1)*k}" stroke="#28361a" stroke-width="2.4" marker-end="url(#ar${id})"/>`;}
+    const occ={};const add=(q,nm)=>{const key=q.join();(occ[key]=occ[key]||{q,l:[]}).l.push(nm)};
+    add(s.h,'cabeça');s.b.forEach((q,i)=>add(q,String(i)));
+    Object.values(occ).forEach(({q,l})=>{if(l.length<2)return;const t=l.join(' + '),w=t.length*6.2+8,cx=q[0]*20+10,y=q[1]<1?q[1]*20+22:q[1]*20-14;
+      o+=`<rect x="${Math.max(1,Math.min(239-w,cx-w/2))}" y="${y}" width="${w}" height="13" rx="3" fill="#fff6a0" stroke="#28361a"/><text x="${Math.max(1+w/2,Math.min(239-w/2,cx))}" y="${y+10}" text-anchor="middle" font-family="Silkscreen,monospace" font-size="8.5" fill="#28361a">${t}</text>`;});
+    under.innerHTML=u;over.innerHTML=o;
+  }};
+}
+
+/* ---------- passos do laboratório ---------- */
+const HEADCODE={right:'cobra.setx(cobra.xcor() + 20)',down:'cobra.sety(cobra.ycor() - 20)'};
+const S=[];const push=(st,o)=>S.push({...clone(st),...o});
+let st=clone(START);
+push(st,{line:[],dir:'right',name:'Antes de começar',text:'A cobra tem a cabeça e 4 pedaços no corpo, guardados na lista corpo. O pedaço 0 é o mais perto da cabeça, o 3 é a ponta do rabo. Ela vai andar para a direita.',vars:{len:4}});
+[['right','direita'],['down','baixo']].forEach(([dir,nome],f)=>{
+  const n=st.b.length;
+  push(st,{line:[0],dir,name:`Quadro ${f+1}: o for começa`,text:`len(corpo) é ${n}, então range(${n-1}, 0, -1) vai entregar i = ${n-1}, depois ${n-2}, depois ${n-3}. Sempre do rabo em direção à cabeça.`,vars:{len:n}});
+  for(let i=n-1;i>=1;i--){
+    const q=st.b[i-1],[x,y]=tc(q);
+    push(st,{line:[0,1,2],dir,name:`i = ${i}: ler a posição da frente`,text:`Quem está na frente do pedaço ${i}? O corpo[${i-1}]. Guardamos onde ele está: x = ${x}, y = ${y}. A seta mostra para onde o pedaço ${i} vai.`,vars:{len:n,i,x,y},arrow:[st.b[i],q],ghost:q,focus:[i,i-1],read:i-1});
+    st.b[i]=[...q];
+    push(st,{line:[3],dir,name:`i = ${i}: pular para lá`,text:`corpo[${i}].goto(${x}, ${y}). O pedaço ${i} foi para o lugar do ${i-1}. Por um instante os dois estão na mesma casa, e tudo bem: no próximo passo o ${i-1} também anda.`,vars:{len:n,i,x,y},focus:[i],changed:i});
+  }
+  push(st,{line:[0],dir,name:'O laço termina',text:`O próximo valor seria i = 0, mas o range para ANTES do 0. O pedaço 0 não tem nenhum pedaço do corpo na frente dele. Quem está na frente é a cabeça.`,vars:{len:n,i:'acabou'}});
+  const [hx,hy]=tc(st.h);
+  push(st,{line:[5,6],dir,name:'corpo[0] segue a cabeça',text:`O corpo[0] vai para onde a cabeça está agora: x = ${hx}, y = ${hy}.`,vars:{len:n,x:hx,y:hy},arrow:[st.b[0],st.h],ghost:st.h,focus:[0,'h'],read:'h'});
+  st.b[0]=[...st.h];
+  push(st,{line:[6],dir,name:'Pedaço 0 em cima da cabeça',text:'Agora o pedaço 0 e a cabeça dividem a mesma casa. Todo o corpo já andou. Só falta a cabeça.',vars:{len:n,x:hx,y:hy},focus:[0],changed:0});
+  const nh=dir==='right'?[st.h[0]+1,st.h[1]]:[st.h[0],st.h[1]+1];
+  push(st,{line:[7,8],dir,name:`A cabeça anda para ${nome}`,text:`A cabeça se move 20 pixels para ${nome}. Pronto: a cobra inteira andou uma casa${f===1?' e fez a curva! O corpo copia o caminho da cabeça sem precisar saber a direção.':'.'}`,vars:{len:n},arrow:[st.h,nh],ghost:nh,focus:['h']});
+  st.h=nh;
+  push(st,{line:[],dir,name:`Fim do quadro ${f+1}`,text:f===0?'Compare com o começo: cada pedaço está onde o da frente estava. Agora o jogador aperta para baixo... aperte Próximo.':'Isso se repete 10 vezes por segundo (time.sleep(0.1)). É por isso que parece que a cobra desliza.',vars:{len:n},focus:['h'],changed:'h'});
+});
+
+const CODE=['for i in range(len(corpo) - 1, 0, -1):','    x = corpo[i - 1].xcor()','    y = corpo[i - 1].ycor()','    corpo[i].goto(x, y)','','if len(corpo) > 0:','    corpo[0].goto(cobra.xcor(), cobra.ycor())','# só depois disso a cabeça anda:',null];
+const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const hlt=t=>{const h=t.indexOf('#');let a=h<0?t:t.slice(0,h),c=h<0?'':t.slice(h);
+  a=esc(a).replace(/\b(for|in|if)\b/g,'<span class="k">$1</span>').replace(/\b(range|len|goto|xcor|ycor|setx|sety)\b/g,'<span class="f">$1</span>').replace(/\b(\d+)\b/g,'<span class="n">$1</span>');
+  return a+(c?`<span class="c">${esc(c)}</span>`:'')};
+const $=id=>document.getElementById(id);
+const lcd=makeLCD($('lcdMain'),4,'m');
+let k=0,timer=null;
+function show(){
+  const s=S[k];lcd.set(s);
+  $('code').innerHTML=CODE.map((t,i)=>`<div class="ln${s.line.includes(i)?' on':''}"><i>${i+1}</i>${hlt(t===null?HEADCODE[s.dir]:t)||' '}</div>`).join('');
+  $('stepName').textContent=s.name;$('say').textContent=s.text;
+  const v=s.vars||{};
+  $('vars').innerHTML=[['len(corpo)',v.len],['i',v.i],['x',v.x],['y',v.y]].map(([a,b])=>`<span class="var${b!==undefined&&a!=='len(corpo)'?' on':''}">${a} = ${b===undefined?'—':b}</span>`).join('');
+  const rows=[['h','cobra (cabeça)',s.h],...s.b.map((q,i)=>[i,`corpo[${i}]`,q])];
+  $('mem').innerHTML=rows.map(([id,nm,q])=>{const[x,y]=tc(q);const cl=String(s.changed)===String(id)?'on':String(s.read)===String(id)?'read':'';return `<tr class="${cl}"><td>${nm}</td><td class="num">${x}</td><td class="num">${y}</td></tr>`}).join('');
+  $('count').textContent=`passo ${k+1} de ${S.length}`;
+  $('prev').disabled=k===0;$('next').textContent=k===S.length-1?'Recomeçar ↺':'Próximo ▶';
+}
+const next=()=>{k=k===S.length-1?0:k+1;show()};
+const prev=()=>{if(k>0){k--;show()}};
+const stop=()=>{clearInterval(timer);timer=null;$('play').textContent='Auto'};
+$('next').onclick=()=>{stop();next()};$('prev').onclick=()=>{stop();prev()};
+$('play').onclick=()=>{if(timer){stop();return}$('play').textContent='Pausa';timer=setInterval(()=>{if(k===S.length-1){stop();return}next()},1900)};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight'){stop();next()}if(e.key==='ArrowLeft'){stop();prev()}});
+show();
+
+/* ---------- comparação ---------- */
+function seq(order){let s=clone(START);const out=[{...clone(s),cap:'Posição inicial'}];
+  order.forEach(i=>{s.b[i]=[...s.b[i-1]];out.push({...clone(s),cap:`corpo[${i}] ← corpo[${i-1}]`,focus:[i]})});
+  s.b[0]=[...s.h];out.push({...clone(s),cap:'corpo[0] ← cabeça',focus:[0]});
+  s.h=[s.h[0]+1,s.h[1]];out.push({...clone(s),cap:'cabeça anda →',focus:['h']});return out}
+const A=seq([3,2,1]),B=seq([1,2,3]);
+const la=makeLCD($('lcdA'),4,'a'),lb=makeLCD($('lcdB'),4,'b');
+const cells=s=>new Set([s.h,...s.b].map(q=>q.join())).size;
+let ck=0,ct=null;
+function cmp(){la.set(A[ck]);lb.set(B[ck]);$('capA').textContent=A[ck].cap;$('capB').textContent=B[ck].cap;
+  $('cntA').textContent=`casas ocupadas: ${cells(A[ck])}`;$('cntB').textContent=`casas ocupadas: ${cells(B[ck])}`;
+  $('cntB').className=ck===A.length-1&&cells(B[ck])<5?'bad':'';$('cntA').className=ck===A.length-1?'ok':''}
+$('runCmp').onclick=()=>{clearInterval(ct);ck=0;cmp();ct=setInterval(()=>{if(ck>=A.length-1){clearInterval(ct);return}ck++;cmp()},1100)};
+$('resetCmp').onclick=()=>{clearInterval(ct);ck=0;cmp()};
+cmp();
+
+/* ---------- range ---------- */
+function rng(){const n=+$('size').value;$('sizeV').textContent=n;
+  $('rng').innerHTML=`<span>range(</span><span class="arg"><b class="a1">${n-1}</b><small>começa no último</small></span><span>,</span><span class="arg"><b class="a2">0</b><small>para antes do 0</small></span><span>,</span><span class="arg"><b class="a3">-1</b><small>anda para trás</small></span><span>)</span>`;
+  const is=[];for(let i=n-1;i>0;i--)is.push(i);
+  $('chips').innerHTML=is.length?is.map((i,j)=>`<div class="chip" style="animation-delay:${j*.12}s"><b>i = ${i}</b><span>corpo[${i}] ← corpo[${i-1}]</span></div>`).join('')+`<div class="chip" style="animation-delay:${is.length*.12}s;border-style:dashed"><b>depois do for</b><span>corpo[0] ← cabeça</span></div>`
+    :`<div class="empty"><strong>range(0, 0, -1) está vazio.</strong> Com 1 pedaço só, o for não roda nenhuma vez. Quem trabalha é só a linha <code>corpo[0].goto(...)</code>, que leva o único pedaço até a cabeça.</div>`}
+$('size').oninput=rng;rng();
+
+/* ---------- copiar ---------- */
+$('copy').onclick=async()=>{const t=$('fixed').textContent;try{await navigator.clipboard.writeText(t);$('copyMsg').textContent='Copiado!'}catch(e){const r=document.createRange();r.selectNodeContents($('fixed'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('copyMsg').textContent='Texto selecionado: use Ctrl+C.'}};
+}
+</script>
+</body>
+</html>
